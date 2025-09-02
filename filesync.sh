@@ -1,8 +1,3 @@
-#!/bin/bash
-
-# Usage:
-# ./safeGuard.sh <dominant_folder> <secondary_folder> [-p|--preserve]
-
 if [[ "$1" == "--make" ]]; then
     target="filesync"
 
@@ -21,18 +16,22 @@ if [[ "$1" == "--make" ]]; then
         fi
     done
 
-    if [[ -n "$install_path" ]]; then
-        mkdir -p "$install_path"
-        cp "$0" "$install_path/$target"
-        chmod +x "$install_path/$target"
-        echo "Installed $target into $install_path (detected shell: $shell_name)"
-        echo "You can now run: $target"
+	if [[ -n "$install_path" ]]; then
+		mkdir -p "$install_path"
+		cp "$0" "$install_path/$target"
+		chmod +x "$install_path/$target"
+		if [[ "$1" ~= "--silent" || "$1" ~= "-s" ]]; then
+			echo "Installed $target into $install_path (detected shell: $shell_name)"
+			echo "You can now run: $target"
+		fi
     else
         cp "$0" "$target"
         chmod +x "$target"
-        echo "Created $target in current directory (detected shell: $shell_name)"
-        echo "But no suitable PATH directory was found."
-        echo "Run with ./filesync or move it manually into a PATH dir."
+	if [[ "$1" ~= "--silent" || "$1" ~= "-s" ]]; then
+		echo "Created $target in current directory (detected shell: $shell_name)"
+		echo "But no suitable PATH directory was found."
+		echo "Run with ./filesync or move it manually into a PATH dir."
+	fi
     fi
     exit 0
 fi
@@ -45,8 +44,10 @@ if [[ "$1" == "--removecommand" ]]; then
     for path in "${candidate_paths[@]}"; do
         if [[ -x "$path/$target" ]]; then
             rm -f "$path/$target"
-            echo "Removed $target from $path"
-            removed=true
+		if [[ "$1" ~= "--silent" || "$1" ~= "-s" ]]; then
+			echo "Removed $target from $path"
+		fi
+		removed=true
         fi
     done
 
@@ -70,6 +71,7 @@ Options:
   --removecommand    Remove the installed 'filesync' command from your PATH.
   -p, --preserve     Preserve files for testing or checking
   -h, --help         Show this help message and exit.
+  -s, --silent       Does not provide any messages
 
 Examples:
   $0 --make
